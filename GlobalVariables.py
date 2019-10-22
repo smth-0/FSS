@@ -10,3 +10,5 @@ RES_BUTTON_SETTINGS_HOVERED = 'res/settingsIconHovered.png'
 
 # variables
 isDebugEnabled = False
+savePath = '/home/downloads'
+myIP = ''

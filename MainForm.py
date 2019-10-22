@@ -64,7 +64,7 @@ class MainForm(QWidget):
             if self.sender().action == 'settings':
                 self.second_form = SettingsForm()
                 self.second_form.show()
-                self.onDestroy()
+
         except Exception:
             print(sys.exc_info())
         # TODO: form calling
