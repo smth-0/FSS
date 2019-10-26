@@ -5,25 +5,39 @@
 import sys
 
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QPushButton, QLabel
+from PyQt5.QtWidgets import QWidget, QLabel
+
 import GlobalVariables as GB
 import UtilityClasses
+import UtilityFunctions as UF
+from SendForm import SendForm
 from SettingsForm import SettingsForm
 
 
 class MainForm(QWidget):
+    """its main window of QWidget which should start first. Requires res folder to be full and not corrupted to work
+    properly. """
+
     def __init__(self):
         super().__init__()
-        self.downloadButton = UtilityClasses.QPicButton(QPixmap(GB.RES_BUTTON_DOWNLOAD),
-                                                        QPixmap(GB.RES_BUTTON_DOWNLOAD_HOVERED), self)
-        self.uploadButton = UtilityClasses.QPicButton(QPixmap(GB.RES_BUTTON_UPLOAD),
-                                                      QPixmap(GB.RES_BUTTON_UPLOAD_HOVERED), self)
-        self.settingsButton = UtilityClasses.QPicButton(QPixmap(GB.RES_BUTTON_SETTINGS),
-                                                        QPixmap(GB.RES_BUTTON_SETTINGS_HOVERED), self)
+        self.settingsForm = SettingsForm()
+        self.sendForm = SendForm()
+        # self.receiveForm = todo: here's receive form class creating, just btw
+        try:
+            self.downloadButton = UtilityClasses.QPicButton(QPixmap(GB.RES_BUTTON_DOWNLOAD),
+                                                            QPixmap(GB.RES_BUTTON_DOWNLOAD_HOVERED), self)
+            self.uploadButton = UtilityClasses.QPicButton(QPixmap(GB.RES_BUTTON_UPLOAD),
+                                                          QPixmap(GB.RES_BUTTON_UPLOAD_HOVERED), self)
+            self.settingsButton = UtilityClasses.QPicButton(QPixmap(GB.RES_BUTTON_SETTINGS),
+                                                            QPixmap(GB.RES_BUTTON_SETTINGS_HOVERED), self)
+        except Exception:
+            UF.debugOutput(r"Can't find something from /res folder, check is program data corrupted.")
+
         self.downloadButtonLabel = QLabel(self)
         self.uploadButtonLabel = QLabel(self)
         self.settingsButtonLabel = QLabel(self)
         self.initUI()
+        UF.debugOutput('successfully inited UI of main form')
 
     def initUI(self):
         self.setGeometry(300, 300, *GB.WINDOW_SIZE)
@@ -53,23 +67,18 @@ class MainForm(QWidget):
 
         self.settingsButtonLabel.setText(self.settingsButton.action)
         self.settingsButtonLabel.move(GB.WINDOW_SIZE[0] - SIZE - 40, GB.WINDOW_SIZE[1] - 20)
+        if GB.isDebugEnabled:
+            print('successfully created the whole interface of MainForm.')
 
     def onClick(self):
-        print('click:', self.sender().action)
+        UF.debugOutput('click button:', self.sender().action)
         try:
             if self.sender().action == 'download':
                 pass
+                # TODO: form calling
             if self.sender().action == 'upload':
-                pass
+                self.sendForm.show()
             if self.sender().action == 'settings':
-                self.second_form = SettingsForm()
-                self.second_form.show()
-
+                self.settingsForm.show()
         except Exception:
-            print(sys.exc_info())
-        # TODO: form calling
-
-    def onDestroy(self):
-        thisView = [self.downloadButton, self.uploadButton, self.settingsButton, self.downloadButtonLabel, self.uploadButtonLabel, self.settingsButtonLabel]
-        for i in thisView:
-            self.layout().removeWidget(i)
+            UF.debugOutput(sys.exc_info())

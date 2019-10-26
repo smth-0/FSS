@@ -7,8 +7,9 @@ RES_BUTTON_UPLOAD_HOVERED = 'res/uploadButtonTextureHovered.png'
 RES_BUTTON_DOWNLOAD_HOVERED = 'res/downloadButtonTextureHovered.png'
 RES_BUTTON_SETTINGS = 'res/settingsIcon.png'
 RES_BUTTON_SETTINGS_HOVERED = 'res/settingsIconHovered.png'
+RES_DB_SETTINGS = '/data/settings.db'
 
 # variables
 isDebugEnabled = False
-savePath = '/home/downloads'
+savePath = 'd'
 myIP = ''

@@ -1,0 +1,148 @@
+import socket
+
+from PyQt5 import QtGui
+from PyQt5.QtWidgets import QWidget, QTextEdit, QPushButton, QLabel, QFileDialog, QProgressBar
+
+import GlobalVariables as GB
+import UtilityClasses
+import UtilityFunctions as UF
+
+
+class SendForm(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.ipAddress = ''
+
+        self.sendButton = QPushButton(self, text='send')
+
+        self.pathButton = QPushButton(self, text='browse')
+        self.pathLabel = UtilityClasses.QInputWithLabel(QTextEdit(self), 'saving path:',
+                                                        [200, 25], [70, 200], self)
+        self.path = GB.savePath
+        self.exampleLabel = QLabel(self)
+        self.applyAddressButton = QPushButton(self)
+        self.sharingCoreLabel = UtilityClasses.QInputWithLabel(QTextEdit(self), 'your sharing code:',
+                                                               [250, 50], [70, 65], self)
+        self.isCorrectAddress = False
+        self.initUI()
+        UF.debugOutput('successfully initialized UI of sending form')
+
+    def initUI(self):
+        self.setGeometry(500, 500, GB.WINDOW_SIZE[0], GB.WINDOW_SIZE[1] * 2)
+        self.setWindowTitle(GB.WINDOW_NAME)
+
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        self.sharingCoreLabel.field.setFont(font)
+
+        self.applyAddressButton.action = 'applyAddress'
+        self.applyAddressButton.move(70, 125)
+        self.applyAddressButton.resize(250, 30)
+        self.applyAddressButton.setText('apply')
+        self.applyAddressButton.clicked.connect(self.onClick)
+
+        self.exampleLabel.setText('example: c0:a8:1f:7')
+        self.exampleLabel.move(70, 20)
+        self.exampleLabel.resize(250, 10)
+
+        self.pathButton.action = 'browse'
+        self.pathButton.resize(50, 25)
+        self.pathButton.move(270, 200)
+        self.pathButton.clicked.connect(self.onClick)
+
+        self.sendButton.action = 'send'
+        self.sendButton.resize(250, 25)
+        self.sendButton.move(70, 240)
+        self.sendButton.clicked.connect(self.onClick)
+
+        self.progressBar = QProgressBar(self)
+        self.progressBar.setGeometry(70, 280, 250, 30)
+        self.progressBar.setMaximum(100)
+
+        self.updateUI()
+
+    def updateUI(self):
+        self.applyAddressButton.setDisabled(self.isCorrectAddress)
+        self.sharingCoreLabel.field.setReadOnly(self.isCorrectAddress)
+        self.pathButton.setDisabled(not self.isCorrectAddress)
+        self.pathLabel.field.setDisabled(not self.isCorrectAddress)
+        self.sendButton.setDisabled(not self.isCorrectAddress)
+        UF.debugOutput('successfully updated UI of send form')
+
+    def onClick(self):
+        UF.debugOutput('click:', self.sender().action)
+        try:
+            if self.sender().action == 'applyAddress':
+
+                self.isCorrectAddress = UF.checkAddress(self.sharingCoreLabel.field.toPlainText())
+
+                if self.isCorrectAddress:
+                    self.ipAddress = str(UF.convertCode(self.sharingCoreLabel.field.toPlainText(), is_hex=True))
+                    UF.debugOutput('set address to', self.ipAddress)
+                else:
+                    self.sharingCoreLabel.qlabel.setText(
+                        self.sharingCoreLabel.qlabel.text() + ' wrong syntax of sharing code')
+
+                if GB.isDebugEnabled:
+                    UF.debugOutput('address verification now is:', self.isCorrectAddress)
+
+            if self.sender().action == 'browse':
+                self.path = str(QFileDialog.getOpenFileName(self, "Select File")[0])
+                self.pathLabel.field.setText(self.path)
+                UF.debugOutput('set path to', self.path)
+
+            if self.sender().action == 'send':
+                self.sendFile()
+
+        except Exception as e:
+
+            UF.debugOutput(e)
+        self.updateUI()
+
+    def sendFile(self):
+        """
+        this function takes self.path and self.ipAddress to get file and target's ip.
+        """
+        UF.debugOutput('trying to send file')
+
+        socketObj = socket.socket()
+
+        try:
+            UF.debugOutput('trying connect to target', repr(self.ipAddress))
+            socketObj.connect((self.ipAddress, 9999))
+        except Exception as e:
+            UF.debugOutput('failed to connect to', repr(self.ipAddress))
+
+        try:
+            UF.setStatus(self.setWindowTitle, 'sending...')
+            currFile = open(self.path, "rb")
+
+            # take extension of file and send it in 255 bytes
+            FileExtension = self.path.split('/')[-1].split('.')[-1]
+            socketObj.send((FileExtension + (' ' * (255 - len(FileExtension)))).encode('utf-8'))
+
+            # take length of file and send it in 255 bytes
+            fileLength = UF.fileSize(self.path)
+            socketObj.send((fileLength + (' ' * (255 - len(fileLength)))).encode('utf-8'))
+            # starting head of file
+            sendingFilePart = currFile.read(2048)
+
+            partCount = fileLength // 2048
+            alreadySentCount = 0
+
+            # the whole file after head
+            while sendingFilePart:
+                socketObj.send(sendingFilePart)
+                sendingFilePart = currFile.read(1024)
+                alreadySentCount += 1
+                self.progressBar.setValue(alreadySentCount)
+
+            socketObj.close()
+            UF.setStatus(self.setWindowTitle, 'sent')
+        except Exception as e:
+            UF.debugOutput('failed to send file to', self.ipAddress, e)
+            UF.setStatus(self.setWindowTitle, 'ERROR')
+
+        self.isCorrectAddress = False
+
+        self.updateUI()

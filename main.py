@@ -1,20 +1,27 @@
 import sys
+
 from PyQt5.QtWidgets import QApplication
-import MainForm
+
 import GlobalVariables
-import socket
+import MainForm
+import UtilityFunctions as UF
 
 # This is main file which launches the whole program
 # just run it
-# optional keys:
-optionalKeys = {'debug': 'forces the whole program to output debug logs to terminal. Default - False.'}
 # (C) Lunar
 
-args = sys.argv
-print('arguments =', args)
 
-GlobalVariables.isDebugEnabled = any([i in optionalKeys.keys() for i in args])
+args = sys.argv
+
+UF.debugOutput('program start')
+GlobalVariables.isDebugEnabled = True  # todo: make exe read the args
+
 app = QApplication(args)
 form = MainForm.MainForm()
-form.show()
+
+try:
+    form.show()
+except Exception as e:
+    UF.debugOutput('main.py, failed to initialize!', e)
+
 sys.exit(app.exec())
