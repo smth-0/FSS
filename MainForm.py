@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QWidget, QLabel
 import GlobalVariables as GB
 import UtilityClasses
 import UtilityFunctions as UF
+from ReceiveForm import ReceiveForm
 from SendForm import SendForm
 from SettingsForm import SettingsForm
 
@@ -22,7 +23,7 @@ class MainForm(QWidget):
         super().__init__()
         self.settingsForm = SettingsForm()
         self.sendForm = SendForm()
-        # self.receiveForm = todo: here's receive form class creating, just btw
+        self.receiveForm = ReceiveForm()
         try:
             self.downloadButton = UtilityClasses.QPicButton(QPixmap(GB.RES_BUTTON_DOWNLOAD),
                                                             QPixmap(GB.RES_BUTTON_DOWNLOAD_HOVERED), self)
@@ -74,8 +75,7 @@ class MainForm(QWidget):
         UF.debugOutput('click button:', self.sender().action)
         try:
             if self.sender().action == 'download':
-                pass
-                # TODO: form calling
+                self.receiveForm.show()
             if self.sender().action == 'upload':
                 self.sendForm.show()
             if self.sender().action == 'settings':
