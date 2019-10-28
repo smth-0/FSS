@@ -14,21 +14,23 @@ class SettingsForm(QWidget):
 
         self.saveButton = QPushButton(self)
         self.pathButton = QPushButton(self)
+
         self.pathLabel = UtilityClasses.QInputWithLabel(QTextEdit(self), 'saving path:',
                                                         [200, 25], [70, 140], self)
-        self.sharingCoreLabel = UtilityClasses.QInputWithLabel(QTextEdit(self), 'your sharing code:',
+        self.sharingCodeLabel = UtilityClasses.QInputWithLabel(QTextEdit(self), 'your sharing code:',
                                                                [250, 50], [70, 50], self)
+
         self.savePath = GB.savePath
         self.initUI()
 
     def initUI(self):
         self.resize(*GB.WINDOW_SIZE)
         self.setWindowTitle(GB.WINDOW_NAME + ' Settings')
-        self.sharingCoreLabel.field.setReadOnly(True)
+        self.sharingCodeLabel.field.setReadOnly(True)
         font = QtGui.QFont()
         font.setPointSize(16)
-        self.sharingCoreLabel.field.setFont(font)
-        self.sharingCoreLabel.field.setText(UF.convertCode(UF.getIP(), False))
+        self.sharingCodeLabel.field.setFont(font)
+        self.sharingCodeLabel.field.setText(UF.convertCode(UF.getIP(), False))
 
         self.pathButton.action = 'browse'
         self.pathButton.setText('browse')

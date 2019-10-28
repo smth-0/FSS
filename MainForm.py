@@ -69,7 +69,7 @@ class MainForm(QWidget):
         self.settingsButtonLabel.setText(self.settingsButton.action)
         self.settingsButtonLabel.move(GB.WINDOW_SIZE[0] - SIZE - 40, GB.WINDOW_SIZE[1] - 20)
         if GB.isDebugEnabled:
-            print('successfully created the whole interface of MainForm.')
+            UF.debugOutput('successfully created the whole interface of MainForm.')
 
     def onClick(self):
         UF.debugOutput('click button:', self.sender().action)

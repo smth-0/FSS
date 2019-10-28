@@ -69,7 +69,7 @@ def fileSize(file_path):
     """
     if os.path.isfile(file_path):
         file_info = os.stat(file_path)
-        return str(file_info.st_size)
+        return int(file_info.st_size)
 
 
 def debugOutput(*args, **kwargs):
@@ -87,3 +87,12 @@ def debugOutput(*args, **kwargs):
 
 def setStatus(set_name_func, status):
     set_name_func(GB.WINDOW_NAME + " - " + status)
+
+
+def sockProtocolConverter(data):
+    """
+    this thing returns cut off data from received bytes.
+    :param data:
+    :return str:
+    """
+    return data.lstrip(r"b\'").rstrip('\'').rstrip(' ')

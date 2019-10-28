@@ -4,11 +4,10 @@ from PyQt5.QtWidgets import QApplication
 
 import GlobalVariables
 import MainForm
-import UtilityFunctions as UF
-
 # This is main file which launches the whole program
 # just run it
 # (C) Lunar
+import UtilityFunctions
 
 
 args = sys.argv
