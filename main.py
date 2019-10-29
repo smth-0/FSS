@@ -12,8 +12,8 @@ import UtilityFunctions
 
 args = sys.argv
 
-UF.debugOutput('program start')
-GlobalVariables.isDebugEnabled = True  # todo: make exe read the args
+GlobalVariables.isDebugEnabled = True
+GlobalVariables.myIP = UtilityFunctions.getIP()
 
 app = QApplication(args)
 form = MainForm.MainForm()
@@ -21,6 +21,6 @@ form = MainForm.MainForm()
 try:
     form.show()
 except Exception as e:
-    UF.debugOutput('main.py, failed to initialize!', e)
+    UtilityFunctions.debugOutput('main.py, failed to initialize!', e)
 
 sys.exit(app.exec())
