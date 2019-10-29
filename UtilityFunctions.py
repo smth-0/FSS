@@ -95,4 +95,4 @@ def sockProtocolConverter(data):
     :param data:
     :return str:
     """
-    return data.lstrip(r"b\'").rstrip('\'').rstrip(' ')
+    return str(data).lstrip(r"b\'").rstrip('\'').rstrip(' ')
