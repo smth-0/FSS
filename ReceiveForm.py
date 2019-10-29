@@ -1,5 +1,7 @@
+from socket import socket
+
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import QWidget, QTextEdit, QLabel
+from PyQt5.QtWidgets import QWidget, QTextEdit, QPushButton, QFileDialog
 
 import GlobalVariables as GB
 import UtilityClasses as UC
@@ -10,14 +12,17 @@ import UtilityFunctions as UF
 class ReceiveForm(QWidget):
     def __init__(self):
         super().__init__()
-        self.statusLabel = QLabel(parent=self, text='connection status: ')
-        self.sharingCoreLabel = UC.QInputWithLabel(QTextEdit(self), 'your sharing code:',
+
+        self.savePath = GB.savePath
+        self.readyFlag = False
+
+        self.sharingCodeLabel = UC.QInputWithLabel(QTextEdit(self), 'your sharing code:',
                                                    [250, 50], [70, 50], self)
         self.pathLabel = UC.QInputWithLabel(QTextEdit(self), 'saving path:',
                                             [200, 25], [70, 130], self)
 
-        self.status = ''
-
+        self.pathButton = QPushButton(self)
+        self.readyButton = QPushButton(self)
         self.initUI()
 
     def initUI(self):

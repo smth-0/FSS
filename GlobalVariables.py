@@ -11,5 +11,5 @@ RES_DB_SETTINGS = '/data/settings.db'
 
 # variables
 isDebugEnabled = False
-savePath = 'd'
+savePath = '/home/downloads'
 myIP = ''
