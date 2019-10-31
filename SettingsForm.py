@@ -69,7 +69,8 @@ class SettingsForm(QWidget):
                 self.savePath = path
         if self.sender().action == 'save':
             GB.savePath = self.savePath
-            # todo: here at is saving of setings
+            settingsFile = UtilityClasses.UtilitySettingsFileManager()
+            settingsFile.save()
             self.close()
         if self.sender().action == 'about':
             self.aboutForm.show()

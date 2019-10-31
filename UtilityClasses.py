@@ -2,6 +2,9 @@ from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QLabel, QAbstractButton
 
+import GlobalVariables as GB
+import UtilityFunctions
+
 
 class QInputWithLabel:
     def __init__(self, input_field, q_label_text, element_size, pos, layout_self):

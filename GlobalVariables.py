@@ -14,5 +14,5 @@ VERSION = 'v0.8'
 
 # variables
 isDebugEnabled = False
-savePath = '/home/downloads'
+savePath = ''
 myIP = getIP()
