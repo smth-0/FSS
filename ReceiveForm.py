@@ -57,7 +57,13 @@ class ReceiveForm(QWidget):
         self.pathLabel.field.setText(self.savePath)
         if self.readyFlag:
             self.readyButton.setText('ready to connect!')
-            self.onReady()
+            while True:
+                if self.receiveFile():
+                    UF.okDialog('Successfully received the file.')
+                    break
+                else:
+                    if not UF.okDialog('Failed to receive the file. Press ok to try again.'):
+                        break
         else:
             self.readyButton.setText('be ready!')
 
@@ -73,7 +79,7 @@ class ReceiveForm(QWidget):
             self.readyFlag = True
         self.updateUI()
 
-    def onReady(self):
+    def receiveFile(self):
         UF.debugOutput('ready flag out, building receiver')
 
         # opening connection

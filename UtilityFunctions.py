@@ -3,6 +3,8 @@ import sys
 from sys import platform
 from time import gmtime, strftime
 
+from PyQt5.QtWidgets import QMessageBox
+
 import GlobalVariables as GB
 
 
@@ -108,3 +110,19 @@ def sockProtocolConverter(data):
     :return str:
     """
     return str(data).lstrip(r"b\'").rstrip('\'').rstrip(' ')
+
+
+def okDialog(text_to_display):
+    """
+    this function creates dialog with ok and cancel buttons, and returns True if ok has been clicked.
+    :param text_to_display:
+    :return bool:
+    """
+    msgBox = QMessageBox()
+    msgBox.setIcon(QMessageBox.Information)
+    msgBox.setText(text_to_display)
+    msgBox.setWindowTitle(GB.WINDOW_NAME)
+    msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+
+    returnValue = msgBox.exec()
+    return returnValue == QMessageBox.Ok

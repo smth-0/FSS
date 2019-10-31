@@ -20,9 +20,6 @@ GlobalVariables.myIP = UtilityFunctions.getIP()
 conn = UtilityClasses.UtilitySettingsFileManager()
 conn.load()
 
-print('>' * 20, GlobalVariables.savePath)
-
-
 app = QApplication(args)
 form = MainForm.MainForm()
 
