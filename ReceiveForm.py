@@ -1,7 +1,8 @@
+import os
 from socket import socket
 
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import QWidget, QTextEdit, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QWidget, QTextEdit, QPushButton, QFileDialog, QProgressBar
 
 import GlobalVariables as GB
 import UtilityClasses as UC
@@ -26,7 +27,7 @@ class ReceiveForm(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setGeometry(500, 500, *GB.WINDOW_SIZE)
+        self.setGeometry(500, 500, GB.WINDOW_SIZE[0], GB.WINDOW_SIZE[1] * 1.5)
         self.setWindowTitle(GB.WINDOW_NAME)
 
         self.sharingCodeLabel.field.setReadOnly(True)
@@ -43,6 +44,11 @@ class ReceiveForm(QWidget):
         self.readyButton.setGeometry(70, 160, 260, 30)
         self.readyButton.action = 'ready'
         self.readyButton.clicked.connect(self.onClick)
+
+        self.progressBar = QProgressBar(self)
+        self.progressBar.setGeometry(70, 370, 250, 30)
+        self.progressBar.setMaximum(100)
+        self.progressBar.setValue(0)
 
         self.updateUI()
         UF.debugOutput('successfully initialized UI of receive form')
@@ -101,7 +107,7 @@ class ReceiveForm(QWidget):
             return False
 
         try:
-            fileEntry = open(receivedFilename, 'wb')  # open in binary
+            fileEntry = open(receivedFilename, 'w+b')  # open in binary
         except Exception as e:
             UF.debugOutput('failed to create file. aborting connection. stack:', e)
             conn.close()
@@ -110,6 +116,7 @@ class ReceiveForm(QWidget):
         try:
             while filePart:
                 fileEntry.write(filePart)
+                self.updateUI()
                 filePart = conn.recv(1024)
         except Exception as e:
             UF.debugOutput('failed to receive file after header. aborting connection. stack:', e)
@@ -119,5 +126,5 @@ class ReceiveForm(QWidget):
             UF.debugOutput('successfully received the file named ', receivedFilename, ' from ', incomeIP)
 
         fileEntry.close()
-
-        return UF.fileSize(receivedFilename) == receivedLengthOfFile
+        os.replace(receivedFilename, self.savePath + '/' + receivedFilename)
+        return UF.fileSize(GB.savePath + '/' + receivedFilename) == receivedLengthOfFile

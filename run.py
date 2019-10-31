@@ -15,6 +15,7 @@ args = sys.argv
 GlobalVariables.isDebugEnabled = True
 GlobalVariables.myIP = UtilityFunctions.getIP()
 
+
 app = QApplication(args)
 form = MainForm.MainForm()
 
