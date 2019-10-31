@@ -14,6 +14,7 @@ class ReceiveForm(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.progressBar = QProgressBar(self)
         self.savePath = GB.savePath
         self.readyFlag = False
 
@@ -45,7 +46,6 @@ class ReceiveForm(QWidget):
         self.readyButton.action = 'ready'
         self.readyButton.clicked.connect(self.onClick)
 
-        self.progressBar = QProgressBar(self)
         self.progressBar.setGeometry(70, 370, 250, 30)
         self.progressBar.setMaximum(100)
         self.progressBar.setValue(0)

@@ -10,6 +10,7 @@ RES_BUTTON_DOWNLOAD_HOVERED = resource_path('res/downloadButtonTextureHovered.pn
 RES_BUTTON_SETTINGS = resource_path('res/settingsIcon.png')
 RES_BUTTON_SETTINGS_HOVERED = resource_path('res/settingsIconHovered.png')
 RES_DB_SETTINGS = resource_path('/data/settings.db')
+VERSION = 'v0.8'
 
 # variables
 isDebugEnabled = False
