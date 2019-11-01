@@ -48,3 +48,30 @@ class QPicButton(QAbstractButton):
 
     def sizeHint(self):
         return QSize(200, 200)
+
+
+class UtilitySettingsFileManager:
+    """
+    this class is for fast and easy encapsulated input-output of settings to file
+    """
+
+    def save(self):
+        try:
+            fileEntry = open('data/settings.txt', 'w+')
+            fileEntry.write(GB.VERSION + '\n' + GB.savePath)
+        except Exception as e:
+            UtilityFunctions.debugOutput('failed to read from settings.txt. stack:', e)
+            return
+        finally:
+            UtilityFunctions.debugOutput('successfully loaded settings')
+
+    def load(self):
+        try:
+            fileEntry = open('data/settings.txt', 'r')
+            GB.savePath = fileEntry.readlines()[1]
+
+        except Exception as e:
+            UtilityFunctions.debugOutput('failed to write into settings.txt. stack:', e)
+            return
+        finally:
+            UtilityFunctions.debugOutput('successfully loaded settings')
