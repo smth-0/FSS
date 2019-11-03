@@ -5,12 +5,15 @@ from PyQt5.QtWidgets import QWidget, QPushButton
 import GlobalVariables as GB
 import UtilityClasses
 import UtilityFunctions as UF
+from AboutForm import AboutForm
 
 
 class SettingsForm(QWidget):
     """It's settings window of FSS program. updateUI can update UI items on QWidget of this window"""
     def __init__(self):
         super().__init__()
+
+        self.aboutForm = AboutForm()
 
         self.saveButton = QPushButton(self)
         self.pathButton = QPushButton(self)
@@ -39,10 +42,19 @@ class SettingsForm(QWidget):
         self.pathButton.clicked.connect(self.onClick)
 
         self.saveButton.action = 'save'
-        self.saveButton.setText(r'apply')
+        self.saveButton.setText('apply')
         self.saveButton.resize(60, 25)
         self.saveButton.move(GB.WINDOW_SIZE[0] // 2 - 30, GB.WINDOW_SIZE[1] - 30)
         self.saveButton.clicked.connect(self.onClick)
+
+        self.aboutButton = QPushButton(self)
+        self.aboutButton.setText('about')
+        self.aboutButton.action = 'about'
+        self.aboutButton.move(10, GB.WINDOW_SIZE[1] - 30)
+        self.aboutButton.resize(60, 25)
+        self.aboutButton.setFlat(True)
+        self.aboutButton.clicked.connect(self.onClick)
+
         self.updateUI()
         UF.debugOutput('successfully initialized UI of settings form')
 
@@ -57,6 +69,9 @@ class SettingsForm(QWidget):
                 self.savePath = path
         if self.sender().action == 'save':
             GB.savePath = self.savePath
-            # todo: here at is saving of setings
+            settingsFile = UtilityClasses.UtilitySettingsFileManager()
+            settingsFile.save()
             self.close()
+        if self.sender().action == 'about':
+            self.aboutForm.show()
         self.updateUI()

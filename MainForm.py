@@ -67,7 +67,7 @@ class MainForm(QWidget):
         self.uploadButtonLabel.move(260, 100)
 
         self.settingsButtonLabel.setText(self.settingsButton.action)
-        self.settingsButtonLabel.move(GB.WINDOW_SIZE[0] - SIZE - 40, GB.WINDOW_SIZE[1] - 20)
+        self.settingsButtonLabel.move(GB.WINDOW_SIZE[0] - SIZE - 60, GB.WINDOW_SIZE[1] - 20)
         if GB.isDebugEnabled:
             UF.debugOutput('successfully created the whole interface of MainForm.')
 

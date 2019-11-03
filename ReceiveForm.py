@@ -1,5 +1,8 @@
+import os
+from socket import socket
+
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import QWidget, QTextEdit, QLabel
+from PyQt5.QtWidgets import QWidget, QTextEdit, QPushButton, QFileDialog, QProgressBar
 
 import GlobalVariables as GB
 import UtilityClasses as UC
@@ -10,18 +13,22 @@ import UtilityFunctions as UF
 class ReceiveForm(QWidget):
     def __init__(self):
         super().__init__()
-        self.statusLabel = QLabel(parent=self, text='connection status: ')
-        self.sharingCoreLabel = UC.QInputWithLabel(QTextEdit(self), 'your sharing code:',
+
+        self.progressBar = QProgressBar(self)
+        self.savePath = GB.savePath
+        self.readyFlag = False
+
+        self.sharingCodeLabel = UC.QInputWithLabel(QTextEdit(self), 'your sharing code:',
                                                    [250, 50], [70, 50], self)
         self.pathLabel = UC.QInputWithLabel(QTextEdit(self), 'saving path:',
                                             [200, 25], [70, 130], self)
 
-        self.status = ''
-
+        self.pathButton = QPushButton(self)
+        self.readyButton = QPushButton(self)
         self.initUI()
 
     def initUI(self):
-        self.setGeometry(500, 500, *GB.WINDOW_SIZE)
+        self.setGeometry(500, 500, GB.WINDOW_SIZE[0], GB.WINDOW_SIZE[1] * 1.5)
         self.setWindowTitle(GB.WINDOW_NAME)
 
         self.sharingCodeLabel.field.setReadOnly(True)
@@ -39,6 +46,10 @@ class ReceiveForm(QWidget):
         self.readyButton.action = 'ready'
         self.readyButton.clicked.connect(self.onClick)
 
+        self.progressBar.setGeometry(70, 370, 250, 30)
+        self.progressBar.setMaximum(100)
+        self.progressBar.setValue(0)
+
         self.updateUI()
         UF.debugOutput('successfully initialized UI of receive form')
 
@@ -46,7 +57,13 @@ class ReceiveForm(QWidget):
         self.pathLabel.field.setText(self.savePath)
         if self.readyFlag:
             self.readyButton.setText('ready to connect!')
-            self.onReady()
+            while True:
+                if self.receiveFile():
+                    UF.okDialog('Successfully received the file.')
+                    break
+                else:
+                    if not UF.okDialog('Failed to receive the file. Press ok to try again.'):
+                        break
         else:
             self.readyButton.setText('be ready!')
 
@@ -62,7 +79,7 @@ class ReceiveForm(QWidget):
             self.readyFlag = True
         self.updateUI()
 
-    def onReady(self):
+    def receiveFile(self):
         UF.debugOutput('ready flag out, building receiver')
 
         # opening connection
@@ -96,7 +113,7 @@ class ReceiveForm(QWidget):
             return False
 
         try:
-            fileEntry = open(receivedFilename, 'wb')  # open in binary
+            fileEntry = open(receivedFilename, 'w+b')  # open in binary
         except Exception as e:
             UF.debugOutput('failed to create file. aborting connection. stack:', e)
             conn.close()
@@ -105,6 +122,7 @@ class ReceiveForm(QWidget):
         try:
             while filePart:
                 fileEntry.write(filePart)
+                self.updateUI()
                 filePart = conn.recv(1024)
         except Exception as e:
             UF.debugOutput('failed to receive file after header. aborting connection. stack:', e)
@@ -114,5 +132,5 @@ class ReceiveForm(QWidget):
             UF.debugOutput('successfully received the file named ', receivedFilename, ' from ', incomeIP)
 
         fileEntry.close()
-
-        return UF.fileSize(receivedFilename) == receivedLengthOfFile
+        os.replace(receivedFilename, self.savePath + '/' + receivedFilename)
+        return UF.fileSize(GB.savePath + '/' + receivedFilename) == receivedLengthOfFile
