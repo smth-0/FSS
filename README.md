@@ -8,13 +8,13 @@
 - open source: feel free to make pull requests and copies of my program.
 
 **How to run:**
-> windows:
-- run `FSS.exe` in `run` folder.
-OR
-- simply ran `.bat` file in zip folder after unpacking.
+windows:
+> - run `FSS.exe` in `run` folder.
+> OR
+> - simply ran `.bat` file in zip folder after unpacking.
 
-> linux:
-- run `run` executable in `run` folder.
+linux:
+> - run `run` executable in `run` folder.
 
 screenshots: 
 
