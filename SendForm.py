@@ -77,6 +77,10 @@ class SendForm(QWidget):
 
                 self.isCorrectAddress = UF.checkAddress(self.sharingCoreLabel.field.toPlainText())
 
+                if self.sharingCoreLabel.field.toPlainText() == UF.convertCode(UF.getIP(), False):
+                    self.isCorrectAddress = UF.okDialog(
+                        'you trying to set your address as target. press ok to continue')
+
                 if self.isCorrectAddress:
                     self.ipAddress = str(UF.convertCode(self.sharingCoreLabel.field.toPlainText(), is_hex=True))
 
@@ -84,10 +88,6 @@ class SendForm(QWidget):
                 else:
                     self.sharingCoreLabel.q_label.setText(
                         self.sharingCoreLabel.q_label.text() + ' wrong syntax of sharing code')
-                if self.ipAddress == UF.convertCode(UF.getIP(), False):
-                    if not UF.okDialog('you trying to set your address as target. press ok to continue'):
-                        self.sharingCoreLabel.q_label.setText(
-                            self.sharingCoreLabel.q_label.text() + ' wrong syntax of sharing code')
 
                 if GB.isDebugEnabled:
                     UF.debugOutput('address verification now is:', self.isCorrectAddress)
@@ -98,7 +98,10 @@ class SendForm(QWidget):
                 UF.debugOutput('set path to', self.path)
 
             if self.sender().action == 'send':
-                self.sendFile()
+                if self.path:
+                    self.sendFile()
+                else:
+                    UF.okDialog('wrong path to file')
 
         except Exception as e:
 
