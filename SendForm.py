@@ -13,9 +13,9 @@ class SendForm(QWidget):
         super().__init__()
         self.ipAddress = ''
 
-        self.sendButton = QPushButton(self, text='send')
+        self.sendButton = QPushButton(parent=self, text='send')
 
-        self.pathButton = QPushButton(self, text='browse')
+        self.pathButton = QPushButton(parent=self, text='browse')
         self.pathLabel = UtilityClasses.QInputWithLabel(QTextEdit(self), 'file to send:',
                                                         [200, 25], [70, 200], self)
         self.path = GB.savePath
@@ -79,10 +79,15 @@ class SendForm(QWidget):
 
                 if self.isCorrectAddress:
                     self.ipAddress = str(UF.convertCode(self.sharingCoreLabel.field.toPlainText(), is_hex=True))
+
                     UF.debugOutput('set address to', self.ipAddress)
                 else:
-                    self.sharingCoreLabel.qlabel.setText(
-                        self.sharingCoreLabel.qlabel.text() + ' wrong syntax of sharing code')
+                    self.sharingCoreLabel.q_label.setText(
+                        self.sharingCoreLabel.q_label.text() + ' wrong syntax of sharing code')
+                if self.ipAddress == UF.convertCode(UF.getIP(), False):
+                    if not UF.okDialog('you trying to set your address as target. press ok to continue'):
+                        self.sharingCoreLabel.q_label.setText(
+                            self.sharingCoreLabel.q_label.text() + ' wrong syntax of sharing code')
 
                 if GB.isDebugEnabled:
                     UF.debugOutput('address verification now is:', self.isCorrectAddress)

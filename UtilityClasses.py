@@ -13,13 +13,13 @@ class QInputWithLabel:
         self.field.resize(*element_size)
         self.field.move(*pos)
 
-        self.qlabel = QLabel(layout_self)
-        self.qlabel.move(pos[0], pos[1] - element_size[1])
-        self.qlabel.setText(q_label_text)
-        self.qlabel.resize(*element_size)
+        self.q_label = QLabel(layout_self)
+        self.q_label.move(pos[0], pos[1] - element_size[1])
+        self.q_label.setText(q_label_text)
+        self.q_label.resize(*element_size)
 
     def copy(self):
-        return QInputWithLabel(self.field, self.qlabel.text(),
+        return QInputWithLabel(self.field, self.q_label.text(),
                                (*self.element_size,), (*self.pos,), self.layout_self)
 
 
@@ -55,7 +55,8 @@ class UtilitySettingsFileManager:
     this class is for fast and easy encapsulated input-output of settings to file
     """
 
-    def save(self):
+    @staticmethod
+    def save():
         try:
             fileEntry = open('data/settings.txt', 'w+')
             fileEntry.write(GB.VERSION + '\n' + GB.savePath)
@@ -65,10 +66,14 @@ class UtilitySettingsFileManager:
         finally:
             UtilityFunctions.debugOutput('successfully loaded settings')
 
-    def load(self):
+    @staticmethod
+    def load():
         try:
             fileEntry = open('data/settings.txt', 'r')
-            GB.savePath = fileEntry.readlines()[1]
+            if fileEntry.readlines()[0] == GB.VERSION:
+                GB.savePath = fileEntry.readlines()[1]
+            else:
+                GB.savePath = UtilityFunctions.get_download_path()
 
         except Exception as e:
             UtilityFunctions.debugOutput('failed to write into settings.txt. stack:', e)

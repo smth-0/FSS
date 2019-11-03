@@ -14,16 +14,16 @@ import UtilityFunctions
 
 
 args = sys.argv
-
-GlobalVariables.isDebugEnabled = True
-GlobalVariables.myIP = UtilityFunctions.getIP()
-conn = UtilityClasses.UtilitySettingsFileManager()
-conn.load()
-
-app = QApplication(args)
-form = MainForm.MainForm()
-
 try:
+
+    GlobalVariables.isDebugEnabled = True
+    GlobalVariables.myIP = UtilityFunctions.getIP()
+    conn = UtilityClasses.UtilitySettingsFileManager()
+    conn.load()
+
+    app = QApplication(args)
+    form = MainForm.MainForm()
+
     form.show()
 except Exception as e:
     UtilityFunctions.debugOutput('main.py, failed to initialize!', e)

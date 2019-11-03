@@ -8,5 +8,5 @@ setup(
     license='GNU General Public License v3.0 ',
     author='lunar',
     author_email='someth183@gmail.com',
-    description='File Sharing Service'
+    description='File Sharing Service', install_requires=['PyQt5']
 )
