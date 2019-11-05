@@ -71,6 +71,9 @@ class SettingsForm(QWidget):
             GB.savePath = self.savePath
             settingsFile = UtilityClasses.UtilitySettingsFileManager()
             settingsFile.save()
+
+            UF.debugOutput('output folder set to ', GB.savePath, ' local is ', self.savePath)
+            self.updateUI()
             self.close()
         if self.sender().action == 'about':
             self.aboutForm.show()

@@ -55,28 +55,29 @@ class UtilitySettingsFileManager:
     this class is for fast and easy encapsulated input-output of settings to file
     """
 
-    @staticmethod
-    def save():
+    def save(self):
         try:
-            fileEntry = open('data/settings.txt', 'w+')
-            fileEntry.write(GB.VERSION + '\n' + GB.savePath)
+            fileEntry = open(GB.RES_DB_SETTINGS, 'w+')
+            fileEntry.write(GB.savePath)
         except Exception as e:
             UtilityFunctions.debugOutput('failed to read from settings.txt. stack:', e)
             return
         finally:
             UtilityFunctions.debugOutput('successfully loaded settings')
 
-    @staticmethod
-    def load():
+    def load(self):
         try:
-            fileEntry = open('data/settings.txt', 'r')
-            if fileEntry.readlines()[0] == GB.VERSION:
-                GB.savePath = fileEntry.readlines()[1]
-            else:
-                GB.savePath = UtilityFunctions.get_download_path()
+            fileEntry = open(GB.RES_DB_SETTINGS, 'r')
+            sett = ''.join(fileEntry.readlines())
+            UtilityFunctions.debugOutput('read ', sett, ' from file of settings')
+            GB.savePath = sett
+            UtilityFunctions.debugOutput('loaded settings from file. now GB.savePath = ', GB.savePath)
 
         except Exception as e:
-            UtilityFunctions.debugOutput('failed to write into settings.txt. stack:', e)
+            UtilityFunctions.debugOutput('failed to read from settings.txt. creating it. stack:', e)
+            # fileEntry = open(GB.RES_DB_SETTINGS, 'w+')
+            GB.savePath = UtilityFunctions.get_download_path()
+            # fileEntry.close()
             return
         finally:
             UtilityFunctions.debugOutput('successfully loaded settings')

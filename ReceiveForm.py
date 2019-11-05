@@ -1,5 +1,5 @@
 import os
-from socket import socket
+import socket
 
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QWidget, QTextEdit, QPushButton, QFileDialog, QProgressBar
@@ -83,10 +83,12 @@ class ReceiveForm(QWidget):
         UF.debugOutput('ready flag out, building receiver')
 
         # opening connection
-        sock = socket()
+        sock = socket.socket()
         sock.bind((GB.myIP, 9999))
         sock.listen(True)
+
         conn, incomeIP = sock.accept()
+        conn.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         # receiving filename of file
         try:
@@ -104,18 +106,19 @@ class ReceiveForm(QWidget):
             conn.close()
             return False
 
-        # receiving head of the file
-        try:
-            filePart = conn.recv(2048)
-        except Exception as e:
-            UF.debugOutput('failed to receive header of file. aborting connect. stack:', e)
-            conn.close()
-            return False
-
         try:
             fileEntry = open(receivedFilename, 'w+b')  # open in binary
         except Exception as e:
             UF.debugOutput('failed to create file. aborting connection. stack:', e)
+            conn.close()
+            return False
+
+        # receiving head of the file
+        try:
+            filePart = conn.recv(4096)
+            fileEntry.write(filePart)
+        except Exception as e:
+            UF.debugOutput('failed to receive header of file. aborting connect. stack:', e)
             conn.close()
             return False
 
@@ -129,7 +132,9 @@ class ReceiveForm(QWidget):
             conn.close()
             return False
         finally:
-            UF.debugOutput('successfully received the file named ', receivedFilename, ' from ', incomeIP)
+            UF.debugOutput('successfully received the file named ', receivedFilename, ' to ', self.savePath, ' from ',
+                           incomeIP, ' file length should be ', receivedLengthOfFile, ' but received ',
+                           UF.fileSize(GB.savePath + '/' + receivedFilename))
 
         fileEntry.close()
         os.replace(receivedFilename, self.savePath + '/' + receivedFilename)

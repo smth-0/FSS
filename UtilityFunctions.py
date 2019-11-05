@@ -37,21 +37,27 @@ def get_download_path():
 
 def getIP():
     """
-    nothing special just returns IPv4 of this pc (mac is not a pc!)
+    nothing special just returns IPv4 of this pc (mac is not pc!)
     (c) Lunar
     """
     import socket
 
     if platform == "linux" or platform == "linux2":
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        return s.getsockname()[0]
+        if socket.gethostbyname(socket.gethostname()).split('.')[0] != '172':
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
+        else:
+            return '0.0.0.0'
 
     elif platform == "darwin":
         debugOutput(r"""you're running MacOS, i'm not gonna support this thing.""")
 
     elif platform == "win32":
-        return socket.gethostbyname(socket.gethostname())
+        if socket.gethostbyname(socket.gethostname()).split('.')[0] != '172':
+            return socket.gethostbyname(socket.gethostname())
+        else:
+            return '0.0.0.0'
 
 
 def convertCode(code, is_hex):

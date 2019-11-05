@@ -15,7 +15,7 @@ class AboutForm(QWidget):
     def __init__(self):
         super().__init__()
         self.upperLabel = QLabel(parent=self, text='made with love.\nby Lunar')
-        self.rightlabel = QLabel(parent=self, text='version: ' + GB.VERSION)
+        self.rightlabel = QLabel(parent=self, text='    version: ' + GB.VERSION + '\nLicenced with GNU GPL v3')
         self.picLabelOSLogo = QLabel(self)
         self.picLabelLunarLogo = QLabel(self)
         self.initUI()
@@ -27,7 +27,7 @@ class AboutForm(QWidget):
 
         self.upperLabel.move(10, 20)
 
-        self.rightlabel.move(300, 150)
+        self.rightlabel.move(170, 150)
 
         self.picLabelOSLogo.setPixmap(
             QPixmap(UF.resource_path(
