@@ -134,7 +134,7 @@ class ReceiveForm(QWidget):
         finally:
             UF.debugOutput('successfully received the file named ', receivedFilename, ' to ', self.savePath, ' from ',
                            incomeIP, ' file length should be ', receivedLengthOfFile, ' but received ',
-                           UF.fileSize(GB.savePath + '/' + receivedFilename))
+                           UF.fileSize(GB.savePath + receivedFilename))
 
         fileEntry.close()
         os.replace(receivedFilename, self.savePath + '/' + receivedFilename)

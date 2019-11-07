@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['run.py'],
-             pathex=['/home/lunar/PycharmProjects/FSS'],
+             pathex=['C:\\Users\\somet\\PycharmProjects\\FSS'],
              binaries=[],
              datas=[],
              hiddenimports=[],
