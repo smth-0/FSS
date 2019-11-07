@@ -11,6 +11,7 @@ import UtilityFunctions
 # just run it
 # (C) Lunar
 
+print(UtilityFunctions.convertCode('85.117.105.173', False))
 
 
 args = sys.argv

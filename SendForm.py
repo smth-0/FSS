@@ -99,7 +99,13 @@ class SendForm(QWidget):
 
             if self.sender().action == 'send':
                 if self.path:
-                    self.sendFile()
+                    while True:
+                        if self.sendFile():
+                            UF.okDialog('successfully sent the file!\nPress ok to continue.')
+                            break
+                        else:
+                            if not UF.okDialog('Failed to send the file. Press ok to try again.'):
+                                break
                 else:
                     UF.okDialog('wrong path to file')
 
@@ -122,6 +128,7 @@ class SendForm(QWidget):
             socketObj.connect((self.ipAddress, 9999))
         except Exception as e:
             UF.debugOutput('failed to connect to', repr(self.ipAddress))
+            return False
 
         try:
             UF.setStatus(self.setWindowTitle, 'sending...')
@@ -138,7 +145,7 @@ class SendForm(QWidget):
         except Exception as e:
             UF.debugOutput('failed to send metadata of file to', self.ipAddress, e)
             UF.setStatus(self.setWindowTitle, 'ERROR')
-            return
+            return False
         try:
             # starting head of file
             sendingFilePart = currFile.read(2048)
@@ -162,7 +169,9 @@ class SendForm(QWidget):
         except Exception as e:
             UF.debugOutput('failed to send file to', self.ipAddress, e)
             UF.setStatus(self.setWindowTitle, 'ERROR')
+            return False
 
         self.isCorrectAddress = False
 
         self.updateUI()
+        return True
