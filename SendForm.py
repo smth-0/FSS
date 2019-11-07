@@ -157,7 +157,7 @@ class SendForm(QWidget):
             # the whole file after head
             while sendingFilePart:
                 percentsSent = (2048 + 1024 * alreadySentCount) // fileLength * 100
-                UF.debugOutput('sent ', percentsSent, ' already')
+                UF.debugOutput('sent ', percentsSent, ' already. in bytes:', alreadySentCount * 1024)
                 self.progressBar.setValue(percentsSent)
                 socketObj.send(sendingFilePart)
                 sendingFilePart = currFile.read(1024)

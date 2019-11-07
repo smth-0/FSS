@@ -84,17 +84,20 @@ class ReceiveForm(QWidget):
         UF.debugOutput('ready flag out, building receiver')
         try:
             # opening connection
-            sock = socket.socket(socket.SOL_SOCKET, socket.SO_REUSEADDR)
+            sock = socket.socket()
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.bind((GB.myIP, GB.RES_SOCKET_PORT))
-            sock.listen(True)
 
+            sock.listen(True)
             conn, incomeIP = sock.accept()
         except Exception as e:
             UF.debugOutput('failed to connect properly aborting; stack:', e)
-            return
-        finally:
-            UF.debugOutput('connected to ', incomeIP, '; stack:', e)
-
+            try:
+                conn.close()
+                sock.close()
+            except Exception as ee:
+                UF.debugOutput('connection established but in wrong method. stack:', ee)
+            return False
 
         # receiving filename of file
         try:
@@ -102,6 +105,7 @@ class ReceiveForm(QWidget):
         except Exception as e:
             UF.debugOutput('failed to receive filename. aborting connect. stack:', e)
             conn.close()
+            sock.close()
             return False
 
         # receiving length of file
@@ -110,6 +114,7 @@ class ReceiveForm(QWidget):
         except Exception as e:
             UF.debugOutput('failed to receive file length. aborting connect. stack:', e)
             conn.close()
+            sock.close()
             return False
 
         try:
@@ -117,6 +122,7 @@ class ReceiveForm(QWidget):
         except Exception as e:
             UF.debugOutput('failed to create file. aborting connection. stack:', e)
             conn.close()
+            sock.close()
             return False
 
         # receiving head of the file
@@ -126,6 +132,7 @@ class ReceiveForm(QWidget):
         except Exception as e:
             UF.debugOutput('failed to receive header of file. aborting connect. stack:', e)
             conn.close()
+            sock.close()
             return False
 
         try:
@@ -136,11 +143,15 @@ class ReceiveForm(QWidget):
         except Exception as e:
             UF.debugOutput('failed to receive file after header. aborting connection. stack:', e)
             conn.close()
+            sock.close()
             return False
         finally:
             UF.debugOutput('successfully received the file named ', receivedFilename, ' to ', GB.savePath + receivedFilename, ' from ',
                            incomeIP, ' file length should be ', receivedLengthOfFile, ' but received ',
                            UF.fileSize(GB.savePath + r'/' + receivedFilename))
+
+        conn.close()
+        sock.close()
 
         fileEntry.close()
         os.replace(receivedFilename, self.savePath + r'/' + receivedFilename)
