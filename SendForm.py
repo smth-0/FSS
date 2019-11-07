@@ -125,7 +125,7 @@ class SendForm(QWidget):
 
         try:
             UF.debugOutput('trying connect to target', repr(self.ipAddress))
-            socketObj.connect((self.ipAddress, 9999))
+            socketObj.connect((self.ipAddress, GB.RES_SOCKET_PORT))
         except Exception as e:
             UF.debugOutput('failed to connect to', repr(self.ipAddress))
             return False

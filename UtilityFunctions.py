@@ -55,7 +55,9 @@ def getIP():
 
     elif platform == "win32":
         if socket.gethostbyname(socket.gethostname()).split('.')[0] != '172':
-            return socket.gethostbyname(socket.gethostname())
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
         else:
             return '0.0.0.0'
 

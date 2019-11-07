@@ -37,6 +37,7 @@ class ReceiveForm(QWidget):
         self.sharingCodeLabel.field.setFont(font)
         self.sharingCodeLabel.field.setText(UF.convertCode(UF.getIP(), False))
 
+
         self.pathButton.action = 'browse'
         self.pathButton.setText('browse')
         self.pathButton.setGeometry(270, 130, 60, 25)
@@ -84,7 +85,7 @@ class ReceiveForm(QWidget):
 
         # opening connection
         sock = socket.socket()
-        sock.bind((GB.myIP, 9999))
+        sock.bind((GB.myIP, GB.RES_SOCKET_PORT))
         sock.listen(True)
 
         conn, incomeIP = sock.accept()
@@ -132,10 +133,10 @@ class ReceiveForm(QWidget):
             conn.close()
             return False
         finally:
-            UF.debugOutput('successfully received the file named ', receivedFilename, ' to ', self.savePath, ' from ',
+            UF.debugOutput('successfully received the file named ', receivedFilename, ' to ', GB.savePath + receivedFilename, ' from ',
                            incomeIP, ' file length should be ', receivedLengthOfFile, ' but received ',
-                           UF.fileSize(GB.savePath + receivedFilename))
+                           UF.fileSize(GB.savePath + r'/' + receivedFilename))
 
         fileEntry.close()
-        os.replace(receivedFilename, self.savePath + '/' + receivedFilename)
-        return UF.fileSize(GB.savePath + '/' + receivedFilename) == receivedLengthOfFile
+        os.replace(receivedFilename, self.savePath + r'/' + receivedFilename)
+        return UF.fileSize(GB.savePath + r'/' + receivedFilename) == receivedLengthOfFile
