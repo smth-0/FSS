@@ -125,7 +125,7 @@ class SendForm(QWidget):
 
         try:
             UF.debugOutput('trying connect to target', repr(self.ipAddress))
-            socketObj.connect((self.ipAddress, GB.RES_SOCKET_PORT))
+            socketObj.connect((self.ipAddress, 9999))
         except Exception as e:
             UF.debugOutput('failed to connect to', repr(self.ipAddress))
             return False
@@ -137,13 +137,11 @@ class SendForm(QWidget):
             # take extension of file and send it in 255 bytes
             fileName = self.path.split('/')[-1]
             socketObj.send((fileName + (' ' * (255 - len(fileName)))).encode('utf-8'))
-            UF.debugOutput('sent metadata - filename')
 
             # take length of file and send it in 255 bytes
             fileLength = UF.fileSize(self.path)
             UF.debugOutput('trying to send file with length of ', [fileLength])
             socketObj.send((str(fileLength) + (' ' * (255 - len(str(fileLength))))).encode('utf-8'))
-            UF.debugOutput('sent metadata - length')
         except Exception as e:
             UF.debugOutput('failed to send metadata of file to', self.ipAddress, e)
             UF.setStatus(self.setWindowTitle, 'ERROR')
@@ -159,7 +157,7 @@ class SendForm(QWidget):
             # the whole file after head
             while sendingFilePart:
                 percentsSent = (2048 + 1024 * alreadySentCount) // fileLength * 100
-                UF.debugOutput('sent ', percentsSent, ' already. in bytes:', alreadySentCount * 1024)
+                UF.debugOutput('sent ', percentsSent, ' already')
                 self.progressBar.setValue(percentsSent)
                 socketObj.send(sendingFilePart)
                 sendingFilePart = currFile.read(1024)

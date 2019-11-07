@@ -1,4 +1,3 @@
-import os
 import socket
 
 from PyQt5 import QtGui
@@ -7,7 +6,6 @@ from PyQt5.QtWidgets import QWidget, QTextEdit, QPushButton, QFileDialog, QProgr
 import GlobalVariables as GB
 import UtilityClasses as UC
 import UtilityFunctions as UF
-
 
 
 class ReceiveForm(QWidget):
@@ -37,7 +35,6 @@ class ReceiveForm(QWidget):
         self.sharingCodeLabel.field.setFont(font)
         self.sharingCodeLabel.field.setText(UF.convertCode(UF.getIP(), False))
 
-
         self.pathButton.action = 'browse'
         self.pathButton.setText('browse')
         self.pathButton.setGeometry(270, 130, 60, 25)
@@ -58,16 +55,13 @@ class ReceiveForm(QWidget):
         self.pathLabel.field.setText(self.savePath)
         if self.readyFlag:
             self.readyButton.setText('ready to connect!')
-            try:
-                while True:
-                    if self.receiveFile():
-                        UF.okDialog('Successfully received the file.')
+            while True:
+                if self.receiveFile():
+                    UF.okDialog('Successfully received the file.')
+                    break
+                else:
+                    if not UF.okDialog('Failed to receive the file. Press ok to try again.'):
                         break
-                    else:
-                        if not UF.okDialog('Failed to receive the file. Press ok to try again.'):
-                            break
-            except Exception as e:
-                UF.debugOutput('failed to receive file totally. Stack:', e)
         else:
             self.readyButton.setText('be ready!')
 
@@ -85,22 +79,14 @@ class ReceiveForm(QWidget):
 
     def receiveFile(self):
         UF.debugOutput('ready flag out, building receiver')
-        try:
-            # opening connection
-            sock = socket.socket()
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sock.bind((GB.myIP, GB.RES_SOCKET_PORT))
 
-            sock.listen(True)
-            conn, incomeIP = sock.accept()
-        except Exception as e:
-            UF.debugOutput('failed to connect properly aborting; stack:', e)
-            try:
-                conn.close()
-                sock.close()
-            except Exception as ee:
-                UF.debugOutput('connection established but in wrong method. stack:', ee)
-            return False
+        # opening connection
+        sock = socket.socket()
+        sock.bind((GB.myIP, 9999))
+        sock.listen(True)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        conn, incomeIP = sock.accept()
+        conn.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         # receiving filename of file
         try:
@@ -121,7 +107,7 @@ class ReceiveForm(QWidget):
             return False
 
         try:
-            fileEntry = open(receivedFilename, 'w+b')  # open in binary
+            fileEntry = open(self.savePath + '/' + receivedFilename, 'w+b')  # open in binary
         except Exception as e:
             UF.debugOutput('failed to create file. aborting connection. stack:', e)
             conn.close()
@@ -130,36 +116,28 @@ class ReceiveForm(QWidget):
 
         # receiving head of the file
         try:
-            filePart = conn.recv(4096)
-            fileEntry.write(filePart)
+            filePart = conn.recv(2048)
+            # fileEntry.write(filePart)
         except Exception as e:
             UF.debugOutput('failed to receive header of file. aborting connect. stack:', e)
             conn.close()
             sock.close()
             return False
-
+        # sleep(1)
         try:
             while filePart:
-                try:
-                    fileEntry.write(filePart)
-                    self.updateUI()
-                    filePart = conn.recv(1024)
-                except Exception as e:
-                    UF.debugOutput('failed to receive part of the file; stack:', e)
-                    break
+                fileEntry.write(filePart)
+                filePart = conn.recv(1024)
+
         except Exception as e:
             UF.debugOutput('failed to receive file after header. aborting connection. stack:', e)
             conn.close()
             sock.close()
             return False
         finally:
-            UF.debugOutput('successfully received the file named ', receivedFilename, ' to ', GB.savePath + receivedFilename, ' from ',
+            UF.debugOutput('successfully received the file named ', receivedFilename, ' to ', self.savePath, ' from ',
                            incomeIP, ' file length should be ', receivedLengthOfFile, ' but received ',
-                           UF.fileSize(GB.savePath + r'/' + receivedFilename))
-
-        conn.close()
-        sock.close()
+                           UF.fileSize(GB.savePath + '/' + receivedFilename))
 
         fileEntry.close()
-        os.replace(receivedFilename, self.savePath + r'/' + receivedFilename)
-        return UF.fileSize(GB.savePath + r'/' + receivedFilename) == receivedLengthOfFile
+        return UF.fileSize(GB.savePath + '/' + receivedFilename) == receivedLengthOfFile
