@@ -82,14 +82,19 @@ class ReceiveForm(QWidget):
 
     def receiveFile(self):
         UF.debugOutput('ready flag out, building receiver')
+        try:
+            # opening connection
+            sock = socket.socket(socket.SOL_SOCKET, socket.SO_REUSEADDR)
+            sock.bind((GB.myIP, GB.RES_SOCKET_PORT))
+            sock.listen(True)
 
-        # opening connection
-        sock = socket.socket()
-        sock.bind((GB.myIP, GB.RES_SOCKET_PORT))
-        sock.listen(True)
+            conn, incomeIP = sock.accept()
+        except Exception as e:
+            UF.debugOutput('failed to connect properly aborting; stack:', e)
+            return
+        finally:
+            UF.debugOutput('connected to ', incomeIP, '; stack:', e)
 
-        conn, incomeIP = sock.accept()
-        conn.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         # receiving filename of file
         try:
