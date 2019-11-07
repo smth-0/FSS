@@ -58,13 +58,16 @@ class ReceiveForm(QWidget):
         self.pathLabel.field.setText(self.savePath)
         if self.readyFlag:
             self.readyButton.setText('ready to connect!')
-            while True:
-                if self.receiveFile():
-                    UF.okDialog('Successfully received the file.')
-                    break
-                else:
-                    if not UF.okDialog('Failed to receive the file. Press ok to try again.'):
+            try:
+                while True:
+                    if self.receiveFile():
+                        UF.okDialog('Successfully received the file.')
                         break
+                    else:
+                        if not UF.okDialog('Failed to receive the file. Press ok to try again.'):
+                            break
+            except Exception as e:
+                UF.debugOutput('failed to receive file totally. Stack:', e)
         else:
             self.readyButton.setText('be ready!')
 
@@ -137,9 +140,13 @@ class ReceiveForm(QWidget):
 
         try:
             while filePart:
-                fileEntry.write(filePart)
-                self.updateUI()
-                filePart = conn.recv(1024)
+                try:
+                    fileEntry.write(filePart)
+                    self.updateUI()
+                    filePart = conn.recv(1024)
+                except Exception as e:
+                    UF.debugOutput('failed to receive part of the file; stack:', e)
+                    break
         except Exception as e:
             UF.debugOutput('failed to receive file after header. aborting connection. stack:', e)
             conn.close()

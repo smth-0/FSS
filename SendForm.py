@@ -137,11 +137,13 @@ class SendForm(QWidget):
             # take extension of file and send it in 255 bytes
             fileName = self.path.split('/')[-1]
             socketObj.send((fileName + (' ' * (255 - len(fileName)))).encode('utf-8'))
+            UF.debugOutput('sent metadata - filename')
 
             # take length of file and send it in 255 bytes
             fileLength = UF.fileSize(self.path)
             UF.debugOutput('trying to send file with length of ', [fileLength])
             socketObj.send((str(fileLength) + (' ' * (255 - len(str(fileLength))))).encode('utf-8'))
+            UF.debugOutput('sent metadata - length')
         except Exception as e:
             UF.debugOutput('failed to send metadata of file to', self.ipAddress, e)
             UF.setStatus(self.setWindowTitle, 'ERROR')
