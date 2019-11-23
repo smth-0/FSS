@@ -1,5 +1,5 @@
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import QTextEdit, QFileDialog
+from PyQt5.QtWidgets import QTextEdit, QFileDialog, QCheckBox
 from PyQt5.QtWidgets import QWidget, QPushButton
 
 import GlobalVariables as GB
@@ -13,6 +13,8 @@ class SettingsForm(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.aboutButton = QPushButton(self)
+        self.enableLegacyCheckbox = QCheckBox(self)
         self.aboutForm = AboutForm()
 
         self.saveButton = QPushButton(self)
@@ -44,10 +46,9 @@ class SettingsForm(QWidget):
         self.saveButton.action = 'save'
         self.saveButton.setText('apply')
         self.saveButton.resize(60, 25)
-        self.saveButton.move(GB.WINDOW_SIZE[0] // 2 - 30, GB.WINDOW_SIZE[1] - 30)
+        self.saveButton.move(GB.WINDOW_SIZE[0] - 100, GB.WINDOW_SIZE[1] - 30)
         self.saveButton.clicked.connect(self.onClick)
 
-        self.aboutButton = QPushButton(self)
         self.aboutButton.setText('about')
         self.aboutButton.action = 'about'
         self.aboutButton.move(10, GB.WINDOW_SIZE[1] - 30)
@@ -55,12 +56,18 @@ class SettingsForm(QWidget):
         self.aboutButton.setFlat(True)
         self.aboutButton.clicked.connect(self.onClick)
 
+        self.enableLegacyCheckbox.setText('Legacy file transferring mode')
+        self.enableLegacyCheckbox.setGeometry(GB.WINDOW_SIZE[0] // 2 - 100, GB.WINDOW_SIZE[1] - 30, 200, 25)
+        self.enableLegacyCheckbox.clicked.connect(lambda: self.updateUI())
+        self.enableLegacyCheckbox.setChecked(GB.isLegacyMode)
+
         self.updateUI()
         UF.debugOutput('successfully initialized UI of settings form')
 
     def updateUI(self):
         self.pathLabel.field.setText(self.savePath)
-        self.saveButton.setDisabled(GB.savePath == self.savePath)
+        self.saveButton.setDisabled(GB.savePath == self.savePath and
+                                    GB.isLegacyMode == self.enableLegacyCheckbox.isChecked())
 
     def onClick(self):
         if self.sender().action == 'browse':
@@ -69,6 +76,7 @@ class SettingsForm(QWidget):
                 self.savePath = path
         if self.sender().action == 'save':
             GB.savePath = self.savePath
+            GB.isLegacyMode = self.enableLegacyCheckbox.isChecked()
             settingsFile = UtilityClasses.UtilitySettingsFileManager()
             settingsFile.save()
 

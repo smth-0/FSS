@@ -1,6 +1,6 @@
 import socket
 
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget, QTextEdit, QPushButton, QLabel, QFileDialog, QProgressBar
 
 import GlobalVariables as GB
@@ -16,14 +16,16 @@ class SendForm(QWidget):
         self.sendButton = QPushButton(parent=self, text='send')
 
         self.pathButton = QPushButton(parent=self, text='browse')
-        self.pathLabel = UtilityClasses.QInputWithLabel(QTextEdit(self), 'file to send:',
+        self.pathLabel = UtilityClasses.QInputWithLabel(QTextEdit(self), 'file or files to send:',
                                                         [200, 25], [70, 200], self)
-        self.path = GB.savePath
+        self.path = ''
+        self.fileNames = []
         self.exampleLabel = QLabel(self)
         self.applyAddressButton = QPushButton(self)
         self.sharingCoreLabel = UtilityClasses.QInputWithLabel(QTextEdit(self), 'your sharing code:',
                                                                [250, 50], [70, 65], self)
         self.isCorrectAddress = False
+        self.sendFunc = self.sendFileLegacy if GB.isLegacyMode else self.sendFile()
         self.initUI()
         UF.debugOutput('successfully initialized UI of sending form')
 
@@ -68,6 +70,8 @@ class SendForm(QWidget):
         self.pathLabel.field.setDisabled(not self.isCorrectAddress)
         self.sendButton.setDisabled(not self.isCorrectAddress)
 
+        self.pathLabel.field.setText(', '.join(self.fileNames))
+
         UF.debugOutput('successfully updated UI of send form')
 
     def onClick(self):
@@ -93,14 +97,24 @@ class SendForm(QWidget):
                     UF.debugOutput('address verification now is:', self.isCorrectAddress)
 
             if self.sender().action == 'browse':
-                self.path = str(QFileDialog.getOpenFileName(self, "Select File")[0])
-                self.pathLabel.field.setText(self.path)
-                UF.debugOutput('set path to', self.path)
+                path = QFileDialog.getOpenFileNames(self, 'select file or folder')[0]
+                UF.debugOutput('received ', path, 'from QFileDialog.')
+                if len(path) == 1:
+                    self.path = path
+
+                    UF.debugOutput('set path to', self.path)
+                elif len(path) > 1:
+                    if UF.okDialog('do you really want to select multiple files(or folder), is it ok?'):
+                        zip_path = UF.makeZIP(path)
+                        if zip_path:
+                            self.path = zip_path
+                        UF.debugOutput('set path to local tmp zip file')
+                self.fileNames = [i.split('/')[-1] for i in path]
 
             if self.sender().action == 'send':
                 if self.path:
                     while True:
-                        if self.sendFile():
+                        if self.sendFileLegacy():
                             UF.okDialog('successfully sent the file!\nPress ok to continue.')
                             break
                         else:
@@ -114,8 +128,9 @@ class SendForm(QWidget):
             UF.debugOutput(e)
         self.updateUI()
 
-    def sendFile(self):
+    def sendFileLegacy(self):
         """
+        ||| LEGACY |||
         this function takes self.path and self.ipAddress to get file and target's ip.
         """
         self.sendButton.setDisabled(True)
@@ -175,3 +190,7 @@ class SendForm(QWidget):
 
         self.updateUI()
         return True
+
+    def sendFile(self):
+        pass
+        # TODO: new sending protocol here

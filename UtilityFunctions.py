@@ -1,7 +1,9 @@
 import os
 import sys
+import zipfile
+from os import path
 from sys import platform
-from time import gmtime, strftime
+from time import gmtime, strftime, sleep
 
 from PyQt5.QtWidgets import QMessageBox
 
@@ -134,3 +136,24 @@ def okDialog(text_to_display):
 
     returnValue = msgBox.exec()
     return returnValue == QMessageBox.Ok
+
+
+def makeZIP(list_of_fieldnames):
+    nameOfZIP = 'tmp.zip'
+    try:
+        if path.exists(nameOfZIP):
+            while os.remove(nameOfZIP):
+                pass
+    except Exception as e:
+        debugOutput('failed to delete tmp.zip file, stack:', e)
+        return
+    try:
+        with zipfile.ZipFile(nameOfZIP, 'w',  zipfile.ZIP_DEFLATED) as myzip:
+            for f in list_of_fieldnames:
+                myzip.write(f, f.split('/')[-1])
+
+    except Exception as e:
+        debugOutput('failed to make ZIP file, stack: ', e)
+        okDialog('failed to select')
+        return
+    return nameOfZIP

@@ -23,6 +23,7 @@ class ReceiveForm(QWidget):
 
         self.pathButton = QPushButton(self)
         self.readyButton = QPushButton(self)
+        self.receivingFunc = self.receiveFileLegacy if GB.isLegacyMode else self.receiveFile
         self.initUI()
 
     def initUI(self):
@@ -56,7 +57,7 @@ class ReceiveForm(QWidget):
         if self.readyFlag:
             self.readyButton.setText('ready to connect!')
             while True:
-                if self.receiveFile():
+                if self.receivingFunc():
                     UF.okDialog('Successfully received the file.')
                     break
                 else:
@@ -77,7 +78,7 @@ class ReceiveForm(QWidget):
             self.readyFlag = True
         self.updateUI()
 
-    def receiveFile(self):
+    def receiveFileLegacy(self):
         UF.debugOutput('ready flag out, building receiver')
 
         # opening connection
@@ -140,4 +141,8 @@ class ReceiveForm(QWidget):
                            UF.fileSize(GB.savePath + '/' + receivedFilename))
 
         fileEntry.close()
-        return UF.fileSize(GB.savePath + '/' + receivedFilename) == receivedLengthOfFile
+        return True
+
+    def receiveFile(self):
+        pass
+        # TODO: make receive file with new protocol

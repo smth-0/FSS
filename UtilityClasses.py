@@ -57,8 +57,9 @@ class UtilitySettingsFileManager:
 
     def save(self):
         try:
+            text = '''{}\n{}\n{}'''.format(GB.savePath, 1 if GB.isLegacyMode else 0, 1 if GB.isDebugEnabled else 0)
             fileEntry = open(GB.RES_DB_SETTINGS, 'w+')
-            fileEntry.write(GB.savePath)
+            fileEntry.write(text)
         except Exception as e:
             UtilityFunctions.debugOutput('failed to read from settings.txt. stack:', e)
             return
@@ -68,10 +69,13 @@ class UtilitySettingsFileManager:
     def load(self):
         try:
             fileEntry = open(GB.RES_DB_SETTINGS, 'r')
-            sett = ''.join(fileEntry.readlines())
+            sett = [i.rstrip('\n') for i in fileEntry.readlines()]
             UtilityFunctions.debugOutput('read ', sett, ' from file of settings')
-            GB.savePath = sett
-            UtilityFunctions.debugOutput('loaded settings from file. now GB.savePath = ', GB.savePath)
+            GB.savePath = sett[0]
+            GB.isLegacyMode = True if int(sett[1]) else False
+            GB.isDebugEnabled = True if int(sett[2]) else False
+            UtilityFunctions.debugOutput('loaded settings from file. now GB.savePath = ',
+                                         GB.savePath, '; GB.isLegacyMode =', GB.isLegacyMode)
 
         except Exception as e:
             UtilityFunctions.debugOutput('failed to read from settings.txt. creating it. stack:', e)
