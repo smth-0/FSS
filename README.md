@@ -7,6 +7,12 @@
 - free: this product will be free forever.
 - open source: feel free to make pull requests and copies of my program.
 
+**Current project status:**
+> v0.9 released.
+> v1.0 under development.
+> new network transmission protocol is under investigating.
+
+
 **How to run:**
 windows:
 > - run `FSS.exe` in `run` folder.
