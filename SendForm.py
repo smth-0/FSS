@@ -1,4 +1,5 @@
 import socket
+import threading
 
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget, QTextEdit, QPushButton, QLabel, QFileDialog, QProgressBar
@@ -26,6 +27,7 @@ class SendForm(QWidget):
                                                                [250, 50], [70, 65], self)
         self.isCorrectAddress = False
         self.sendFunc = self.sendFileLegacy if GB.isLegacyMode else self.sendFile()
+        self.ThFunc = threading.Thread(target=self.sendFIleThreaded, daemon=True)
         self.initUI()
         UF.debugOutput('successfully initialized UI of sending form')
 
@@ -192,5 +194,84 @@ class SendForm(QWidget):
         return True
 
     def sendFile(self):
-        pass
-        # TODO: new sending protocol here
+        try:
+            UF.debugOutput('starting sending thread')
+            self.ThFunc.start()
+            UF.debugOutput('started sending thread')
+        except Exception as e:
+            UF.debugOutput('failed to start sending thread. stack:', e)
+            return False
+
+    def sendFIleThreaded(self):
+        """
+        this function takes self.path and self.ipAddress to send actual file.
+        """
+        self.sendButton.setDisabled(True)
+        UF.debugOutput('trying to send file')
+        self.progressBar.setValue(0)
+        socketObj = socket.socket()
+
+        try:
+            UF.debugOutput('trying connect to target', repr(self.ipAddress))
+            socketObj.connect((self.ipAddress, 9999))
+
+            socketObj.send(GB.TOKEN.encode('utf-8'))
+
+            sock = socket.socket()
+            sock.bind((GB.myIP, 9999))
+            sock.listen(True)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            conn, incomeIP = sock.accept()
+            filePart = conn.recv(1024)
+            sock.close()
+            conn.close()
+
+        except Exception as e:
+            UF.debugOutput('failed to connect to', repr(self.ipAddress))
+            return False
+
+        try:
+            UF.setStatus(self.setWindowTitle, 'sending...')
+            currFile = open(self.path, "rb")
+
+            # take extension of file and send it in 255 bytes
+            fileName = self.path.split('/')[-1]
+            socketObj.send((fileName + (' ' * (255 - len(fileName)))).encode('utf-8'))
+
+            # take length of file and send it in 255 bytes
+            fileLength = UF.fileSize(self.path)
+            UF.debugOutput('trying to send file with length of ', [fileLength])
+            socketObj.send((str(fileLength) + (' ' * (255 - len(str(fileLength))))).encode('utf-8'))
+        except Exception as e:
+            UF.debugOutput('failed to send metadata of file to', self.ipAddress, e)
+            UF.setStatus(self.setWindowTitle, 'ERROR')
+            return False
+        try:
+            # starting head of file
+            sendingFilePart = currFile.read(2048)
+
+            partCount = fileLength // 2048
+            percentsSent = 0
+            alreadySentCount = 1
+
+            # the whole file after head
+            while sendingFilePart:
+                percentsSent = (2048 + 1024 * alreadySentCount) // fileLength * 100
+                UF.debugOutput('sent ', percentsSent, ' already')
+                self.progressBar.setValue(percentsSent)
+                socketObj.send(sendingFilePart)
+                sendingFilePart = currFile.read(1024)
+                alreadySentCount += 1
+
+            socketObj.close()
+            UF.setStatus(self.setWindowTitle, 'sent')
+            UF.debugOutput('successfully sent ', fileName, ' to ', self.ipAddress)
+        except Exception as e:
+            UF.debugOutput('failed to send file to', self.ipAddress, e)
+            UF.setStatus(self.setWindowTitle, 'ERROR')
+            return False
+
+        self.isCorrectAddress = False
+
+        self.updateUI()
+        return True

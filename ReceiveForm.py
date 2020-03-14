@@ -1,4 +1,5 @@
 import socket
+import threading
 
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QWidget, QTextEdit, QPushButton, QFileDialog, QProgressBar
@@ -24,6 +25,7 @@ class ReceiveForm(QWidget):
         self.pathButton = QPushButton(self)
         self.readyButton = QPushButton(self)
         self.receivingFunc = self.receiveFileLegacy if GB.isLegacyMode else self.receiveFile
+        self.recTh = threading.Thread(target=self.receivingFunc, args=(), daemon=True)
         self.initUI()
 
     def initUI(self):
@@ -57,7 +59,8 @@ class ReceiveForm(QWidget):
         if self.readyFlag:
             self.readyButton.setText('ready to connect!')
             while True:
-                if self.receivingFunc():
+                x = self.recTh.start()
+                if x:
                     UF.okDialog('Successfully received the file.')
                     break
                 else:
@@ -144,5 +147,73 @@ class ReceiveForm(QWidget):
         return True
 
     def receiveFile(self):
-        pass
+        # UF.debugOutput('starting receiving thread')
+        #
+        # UF.debugOutput('started receiving thread')
+        return self.receiveFileThread()
         # TODO: make receive file with new protocol
+
+    def receiveFileThread(self):
+        UF.debugOutput('ready flag out, building new receiver')
+
+        # opening connection
+        sock = socket.socket()
+        sock.bind((GB.myIP, 9999))
+        sock.listen(True)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        conn, incomeIP = sock.accept()
+        conn.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+        # receiving filename of file
+        try:
+            receivedFilename = UF.sockProtocolConverter(conn.recv(255))
+        except Exception as e:
+            UF.debugOutput('failed to receive filename. aborting connect. stack:', e)
+            conn.close()
+            sock.close()
+            return False
+
+        # receiving length of file
+        try:
+            receivedLengthOfFile = int(UF.sockProtocolConverter(conn.recv(255)))
+        except Exception as e:
+            UF.debugOutput('failed to receive file length. aborting connect. stack:', e)
+            conn.close()
+            sock.close()
+            return False
+
+        try:
+            fileEntry = open(self.savePath + '/' + receivedFilename, 'w+b')  # open in binary
+        except Exception as e:
+            UF.debugOutput('failed to create file. aborting connection. stack:', e)
+            conn.close()
+            sock.close()
+            return False
+
+        # receiving head of the file
+        try:
+            filePart = conn.recv(2048)
+            # fileEntry.write(filePart)
+        except Exception as e:
+            UF.debugOutput('failed to receive header of file. aborting connect. stack:', e)
+            conn.close()
+            sock.close()
+            return False
+        # sleep(1)
+        try:
+            while filePart:
+                fileEntry.write(filePart)
+                filePart = conn.recv(4096)
+
+        except Exception as e:
+            UF.debugOutput('failed to receive file after header. aborting connection. stack:', e)
+            conn.close()
+            sock.close()
+            return False
+        finally:
+            UF.debugOutput('successfully received the file named ', receivedFilename, ' to ', self.savePath, ' from ',
+                           incomeIP, ' file length should be ', receivedLengthOfFile, ' but received ',
+                           UF.fileSize(GB.savePath + '/' + receivedFilename))
+
+        fileEntry.close()
+        return True

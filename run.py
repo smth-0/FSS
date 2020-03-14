@@ -14,7 +14,6 @@ import UtilityFunctions
 
 args = sys.argv
 try:
-
     GlobalVariables.isDebugEnabled = True
     GlobalVariables.myIP = UtilityFunctions.getIP()
     conn = UtilityClasses.UtilitySettingsFileManager()
@@ -26,5 +25,5 @@ try:
     form.show()
 except Exception as e:
     UtilityFunctions.debugOutput('main.py, failed to initialize!', e)
-
-sys.exit(app.exec())
+finally:
+    sys.exit(app.exec())

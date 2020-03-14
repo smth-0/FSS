@@ -39,7 +39,7 @@ def get_download_path():
 
 def getIP():
     """
-    nothing special just returns IPv4 of this pc (mac is not pc!)
+    nothing special just returns IPv4 of this pc (mac is not a pc!)
     (c) Lunar
     """
     import socket
